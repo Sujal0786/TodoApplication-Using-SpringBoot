@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle != null ? pageTitle + ' - Todo App' : 'Todo App'}">Todo App</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .main-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        .navbar-custom {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px 15px 0 0;
+        }
+        .todo-card {
+            transition: all 0.3s ease;
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 15px;
+        }
+        .todo-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+        .completed-todo {
+            opacity: 0.7;
+            background-color: #f8f9fa;
+        }
+        .completed-todo .card-title {
+            text-decoration: line-through;
+        }
+        .stats-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container my-4">
+        <div class="main-container p-0">
+            <!-- Navigation -->
+            <nav class="navbar navbar-expand-lg navbar-dark navbar-custom p-4">
+                <div class="container-fluid">
+                    <a class="navbar-brand fw-bold fs-3" href="/">
+                        <i class="fas fa-tasks me-2"></i>Todo App
+                    </a>
+                    <div class="navbar-nav ms-auto">
+                        <a class="nav-link" href="/" th:classappend="${#request.requestURI == '/' ? 'active' : ''}">
+                            <i class="fas fa-home me-1"></i>All Tasks
+                        </a>
+                        <a class="nav-link" href="/pending" th:classappend="${#request.requestURI == '/pending' ? 'active' : ''}">
+                            <i class="fas fa-clock me-1"></i>Pending
+                        </a>
+                        <a class="nav-link" href="/completed" th:classappend="${#request.requestURI == '/completed' ? 'active' : ''}">
+                            <i class="fas fa-check-circle me-1"></i>Completed
+                        </a>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Content -->
+            <div class="p-4">
+                <!-- Flash Messages -->
+                <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <span th:text="${successMessage}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                
+                <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    <span th:text="${errorMessage}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <!-- Statistics -->
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <div class="card stats-card text-center p-3">
+                            <h3 th:text="${totalCount}">0</h3>
+                            <p class="mb-0">Total Tasks</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card stats-card text-center p-3">
+                            <h3 th:text="${pendingCount}">0</h3>
+                            <p class="mb-0">Pending</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card stats-card text-center p-3">
+                            <h3 th:text="${completedCount}">0</h3>
+                            <p class="mb-0">Completed</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Page Header -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4><i class="fas fa-list me-2"></i><span th:text="${pageTitle}">Tasks</span></h4>
+                    <a href="/" class="btn btn-outline-primary">
+                        <i class="fas fa-plus me-2"></i>Add New Task
+                    </a>
+                </div>
+
+                <!-- Todo List -->
+                <div class="row">
+                    <div class="col-12">
+                        <div th:if="${#lists.isEmpty(todos)}" class="text-center py-5">
+                            <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted" th:text="'No ' + ${#strings.toLowerCase(pageTitle)} + ' tasks!'">No tasks!</h5>
+                            <p class="text-muted">Tasks will appear here when available.</p>
+                        </div>
+
+                        <div th:each="todo : ${todos}" class="todo-card card" 
+                             th:classappend="${todo.completed} ? 'completed-todo' : ''">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <h5 class="card-title" th:text="${todo.title}">Task Title</h5>
+                                        <p class="card-text text-muted" th:text="${todo.description}" 
+                                           th:if="${todo.description != null and !#strings.isEmpty(todo.description)}">
+                                           Task Description
+                                        </p>
+                                        <small class="text-muted">
+                                            <i class="fas fa-calendar-alt me-1"></i>
+                                            Created: <span th:text="${#temporals.format(todo.createdAt, 'MMM dd, yyyy HH:mm')}"></span>
+                                            <span th:if="${todo.updatedAt != null and todo.updatedAt != todo.createdAt}">
+                                                | Updated: <span th:text="${#temporals.format(todo.updatedAt, 'MMM dd, yyyy HH:mm')}"></span>
+                                            </span>
+                                        </small>
+                                    </div>
+                                    <div class="ms-3">
+                                        <div class="btn-group" role="group">
+                                            <!-- Toggle Status Button -->
+                                            <form th:action="@{'/todos/' + ${todo.id} + '/toggle'}" method="post" class="d-inline">
+                                                <button type="submit" class="btn btn-sm" 
+                                                        th:classappend="${todo.completed} ? 'btn-warning' : 'btn-success'"
+                                                        th:title="${todo.completed} ? 'Mark as Pending' : 'Mark as Completed'">
+                                                    <i th:class="${todo.completed} ? 'fas fa-undo' : 'fas fa-check'"></i>
+                                                </button>
+                                            </form>
+                                            
+                                            <!-- Edit Button -->
+                                            <a th:href="@{'/todos/' + ${todo.id} + '/edit'}" 
+                                               class="btn btn-sm btn-outline-primary" title="Edit Task">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            
+                                            <!-- Delete Button -->
+                                            <form th:action="@{'/todos/' + ${todo.id} + '/delete'}" method="post" class="d-inline">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                                        title="Delete Task"
+                                                        onclick="return confirm('Are you sure you want to delete this task?')">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

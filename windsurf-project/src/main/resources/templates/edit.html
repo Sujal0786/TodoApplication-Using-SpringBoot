@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Task - Todo App</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .main-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        .navbar-custom {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px 15px 0 0;
+        }
+        .form-control-custom {
+            border-radius: 15px;
+            border: 2px solid #e9ecef;
+            padding: 12px 20px;
+            transition: all 0.3s ease;
+        }
+        .form-control-custom:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        .btn-custom {
+            border-radius: 25px;
+            padding: 12px 30px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .edit-form {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 15px;
+            padding: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container my-4">
+        <div class="main-container p-0">
+            <!-- Navigation -->
+            <nav class="navbar navbar-expand-lg navbar-dark navbar-custom p-4">
+                <div class="container-fluid">
+                    <a class="navbar-brand fw-bold fs-3" href="/">
+                        <i class="fas fa-tasks me-2"></i>Todo App
+                    </a>
+                    <div class="navbar-nav ms-auto">
+                        <a class="nav-link" href="/">
+                            <i class="fas fa-home me-1"></i>All Tasks
+                        </a>
+                        <a class="nav-link" href="/pending">
+                            <i class="fas fa-clock me-1"></i>Pending
+                        </a>
+                        <a class="nav-link" href="/completed">
+                            <i class="fas fa-check-circle me-1"></i>Completed
+                        </a>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Content -->
+            <div class="p-4">
+                <!-- Page Header -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4><i class="fas fa-edit me-2"></i>Edit Task</h4>
+                    <a href="/" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Tasks
+                    </a>
+                </div>
+
+                <!-- Edit Form -->
+                <div class="row justify-content-center">
+                    <div class="col-md-8">
+                        <div class="edit-form">
+                            <form th:action="@{'/todos/' + ${todo.id}}" th:object="${todo}" method="post">
+                                <div class="mb-4">
+                                    <label for="title" class="form-label fw-bold">Title *</label>
+                                    <input type="text" class="form-control form-control-custom" 
+                                           th:field="*{title}" id="title" placeholder="Enter task title" required>
+                                    <div th:if="${#fields.hasErrors('title')}" class="text-danger mt-2">
+                                        <small th:errors="*{title}"></small>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <label for="description" class="form-label fw-bold">Description</label>
+                                    <textarea class="form-control form-control-custom" 
+                                              th:field="*{description}" id="description" 
+                                              rows="4" placeholder="Enter task description"></textarea>
+                                    <div th:if="${#fields.hasErrors('description')}" class="text-danger mt-2">
+                                        <small th:errors="*{description}"></small>
+                                    </div>
+                                </div>
+
+                                <div class="mb-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" 
+                                               th:field="*{completed}" id="completed">
+                                        <label class="form-check-label fw-bold" for="completed">
+                                            Mark as completed
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex gap-3">
+                                    <button type="submit" class="btn btn-primary btn-custom">
+                                        <i class="fas fa-save me-2"></i>Update Task
+                                    </button>
+                                    <a href="/" class="btn btn-secondary btn-custom">
+                                        <i class="fas fa-times me-2"></i>Cancel
+                                    </a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Task Info -->
+                <div class="row justify-content-center mt-4">
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-subtitle mb-2 text-muted">Task Information</h6>
+                                <p class="card-text">
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar-plus me-1"></i>
+                                        Created: <span th:text="${#temporals.format(todo.createdAt, 'MMM dd, yyyy HH:mm')}"></span>
+                                    </small>
+                                </p>
+                                <p class="card-text" th:if="${todo.updatedAt != null and todo.updatedAt != todo.createdAt}">
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar-alt me-1"></i>
+                                        Last Updated: <span th:text="${#temporals.format(todo.updatedAt, 'MMM dd, yyyy HH:mm')}"></span>
+                                    </small>
+                                </p>
+                                <p class="card-text">
+                                    <small class="text-muted">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        Status: 
+                                        <span th:if="${todo.completed}" class="badge bg-success">Completed</span>
+                                        <span th:unless="${todo.completed}" class="badge bg-warning">Pending</span>
+                                    </small>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
