@@ -140,6 +140,10 @@ Add new features by extending the `TodoService` class and adding corresponding c
    - Ensure Java 17+ is installed and configured
    - Run `mvn clean install` to refresh dependencies
 
+
+
+![App Screenshot](SS.png)
+
 ## License
 
 This project is open source and available under the MIT License.
